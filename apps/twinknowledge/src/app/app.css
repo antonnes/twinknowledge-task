@@ -1,0 +1,13 @@
+* {
+    box-sizing: border-box;
+}
+body {
+    background: #ddd;
+}
+.app-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 15px;
+    padding: 20px;
+}
