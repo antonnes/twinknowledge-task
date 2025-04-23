@@ -1,0 +1,13 @@
+.input {
+
+}
+.cancel-btn {
+    background: #929292;
+    color: #fff;
+}
+.buttons-container {
+    display: flex;
+    width: 175px;
+    margin: 25px auto;
+    justify-content: space-between;
+}

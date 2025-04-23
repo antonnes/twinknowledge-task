@@ -1,58 +1,90 @@
 import React, { useState, useEffect } from 'react';
 import './app.css';
-import Dropdown from './drodown/dropdown';
+import Dropdown from './dropdown/dropdown';
+import Question from './question/question';
+
 const App = () => {
-
-  const handleSelect = (value: string) => {
-    console.log('Selected:', value);
-  };
-
-
   const roundOptions = ['', 'Jeopardy!', 'Double Jeopardy!', 'Final Jeopardy!'];
   const valuesOptions = ['', '$200', '$400', '$600', '$800', '$1000', '$1200'];
 
-  const [selectedPrice, setSelectedPrice] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-
+  const [selectedValue, setSelectedValue] = useState('');
+  const [selectedRound, setSelectedRound] = useState('');
+  const [response, setQuestion] = useState({
+    round: '',
+    question: '',
+    value: ''
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const handleAnswer = (answer: string) => {
+      if(!answer) {
+        setQuestion({
+          round: '',
+          question: '',
+          value: ''
+        });
+      }
+  }
   const handleSearch = () => {
-    if (!selectedPrice || !selectedCategory) {
+    if (!selectedValue || !selectedRound) {
       alert('Please select both price and category.');
       return;
     }
 
-    const priceValue = selectedPrice.replace('$', '');
     const query = new URLSearchParams({
-      price: priceValue,
-      category: selectedCategory
+      value: selectedValue,
+      round: selectedRound
     });
 
-    fetch(`/api/items?${query.toString()}`)
+    fetch(`http://localhost:3000/api?${query.toString()}`)
       .then(res => res.json())
-      .then(data => {
-        console.log('API response:', data);
-        // You can store this in state and render it
+      .then(response => {
+        setQuestion(response);
       })
       .catch(error => {
-        console.error('API error:', error);
+        console.error(error);
       });
   };
 
   return (
 
     <div className='app-container'>
-      <h2 className="title">Jeaopardy!</h2>
-      <Dropdown
-        label='Round selector:'
-        options={roundOptions}
-        onSelect={handleSelect}
-      />
+       <h2 className="title">Jeopardy!</h2>
+      {
+          !response.question && 
+          <div>
+             <div className="form-container">
+              <div className="dropdown">
+                <Dropdown          
+                  label='Round selector:'
+                  options={roundOptions}
+                  onSelect={setSelectedRound}
+                />
+              </div>
+              <div className="dropdown">
+                <Dropdown
+                  label='Value selector:'
+                  options={valuesOptions}
+                  onSelect={setSelectedValue}
+                />
+              </div>          
+            </div>
+            <button className='main-btn button' onClick={handleSearch}>Get question</button> 
+          </div>
+      }     
 
-      <Dropdown
-        label='Value selector:'
-        options={valuesOptions}
-        onSelect={handleSelect}
-      />
-       <button onClick={handleSearch}>Get question</button>
+      {loading && <p>Loading...</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      { 
+        response.question && 
+        <Question 
+          value={response.value} 
+          round={response.round} 
+          question={response.question}
+          onAnswer={handleAnswer}
+        />
+      }
+      
     </div>
   );
 }
